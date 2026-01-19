@@ -1,0 +1,229 @@
+/* =============================================================================
+ *
+ * Waybar configuration
+ *
+ * Configuration reference: https://github.com/Alexays/Waybar/wiki/Configuration
+ *
+ * =========================================================================== */
+
+/* import css definitions for current theme */
+
+/* -----------------------------------------------------------------------------
+ * Keyframes
+ * -------------------------------------------------------------------------- */
+
+
+@keyframes blink-warning {
+    70% {
+        color: @purple;
+    }
+
+    to {
+        color: @purple;
+        background-color: @background;
+    }
+}
+
+@keyframes blink-critical {
+    70% {
+        color: @purple;
+    }
+
+    to {
+        color: @purple;
+        background-color: @error_color;
+    }
+}
+
+/* -----------------------------------------------------------------------------
+ * Base styles
+ * -------------------------------------------------------------------------- */
+
+/* Reset all styles */
+* {
+    border: none;
+    border-radius: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    font-family: "JetBrainsMono NF", "Roboto Mono", sans-serif;
+}
+
+/* The whole bar */
+/*window#waybar {
+    background: @background;
+    color: @purple;
+    font-size: 14px;
+    opacity: 0.9;
+}*/
+
+@import url("./colors.css");
+/* example usage */
+window#waybar {
+opacity: 0.9;
+background: @background;
+color: @purple;
+font-size: 14px; 
+/* or cyan, green, orange, pink, red, yellow, foreground, background-darker etc. */
+}
+
+
+
+/* Each module */
+#custom-pacman,
+#custom-menu,
+#custom-help,
+#custom-scratchpad,
+#custom-github,
+#custom-clipboard,
+#custom-zeit,
+#custom-dnd,
+#custom-valent,
+#custom-idle_inhibitor,
+#bluetooth,
+#battery,
+#clock,
+#cpu,
+#memory,
+#mode,
+#network,
+#pulseaudio,
+#temperature,
+#backlight,
+#language,
+#custom-adaptive-light,
+#custom-sunset,
+#custom-playerctl,
+#custom-weather,
+#tray {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+/* -----------------------------------------------------------------------------
+ * Module styles
+ * -------------------------------------------------------------------------- */
+
+#custom-scratchpad,
+#custom-menu,
+#workspaces button.focused,
+#clock {
+    color: @background;
+    /*background-color: @theme_selected_bg_color;*/
+    background-color: @foreground;
+}
+
+#custom-zeit.tracking {
+    background-color: @background;
+}
+
+#battery {
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+#battery.warning {
+    color: @background;
+}
+
+#battery.critical {
+    color: @error_color;
+}
+
+#battery.warning.discharging {
+    animation-name: blink-warning;
+    animation-duration: 3s;
+}
+
+#battery.critical.discharging {
+    animation-name: blink-critical;
+    animation-duration: 2s;
+}
+
+#clock {
+    font-weight: bold;
+}
+
+#cpu.warning {
+    color: @background;
+}
+
+#cpu.critical {
+    color: @error_color;
+}
+
+#custom-menu {
+    padding-left: 8px;
+    padding-right: 13px;
+}
+
+#memory {
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+#memory.warning {
+    color: @background;
+}
+
+#memory.critical {
+    color: @error_color;
+    animation-name: blink-critical;
+    animation-duration: 2s;
+}
+
+#mode {
+    background: @background_color;
+}
+
+#network.disconnected {
+    color: @background;
+}
+
+#pulseaudio.muted {
+    color: @background;
+}
+
+#temperature.critical {
+    color: @error_color;
+}
+
+#workspaces button {
+    border-top: 2px solid transparent;
+    /* To compensate for the top border and still have vertical centering */
+    padding-bottom: 2px;
+    padding-left: 10px;
+    padding-right: 10px;
+    /*color: @theme_selected_bg_color;*/
+    color: @pink;
+   
+}
+
+#workspaces button.focused {
+   /* border-color: @theme_selected_bg_color;*/
+   border-color: @pink;
+}
+
+#workspaces button.urgent {
+    border-color: @error_color;
+    color: @error_color;
+}
+
+#custom-pacman {
+    color: @background;
+}
+
+#bluetooth.disabled {
+    color: @background;
+}
+
+#custom-wf-recorder {
+    color: @error_color;
+    padding-right: 10px;
+}
+
+#custom-valent.dangerously-empty {
+    color: @background;
+}
