@@ -132,7 +132,7 @@ git clone https://github.com/TU-USUARIO/sway-config.git ~/.config/sway
 
 ### 4. Habilitar el Theme Switcher (Opcional)
 
-Para usar el theme switcher interactivo como comando del sistema:
+Para usar el theme switcher interactivo como comando del sistema y en el launcher de aplicaciones:
 
 **Opción A: Script automático (Recomendado)**
 ```bash
@@ -140,11 +140,34 @@ cd ~/.config/sway
 ./setup-theme-switcher.sh
 ```
 
+Este script configurará automáticamente:
+- ✅ Comando disponible desde terminal (`manjaro-sway-theme`)
+- ✅ Entrada en el launcher de aplicaciones (Rofi/dmenu)
+- ✅ PATH correctamente configurado
+- ✅ Permisos de ejecución
+
 **Opción B: Manual**
 ```bash
 # Crear symlink en ~/.local/bin
 mkdir -p ~/.local/bin
 ln -sf ~/.config/sway/scripts/manjaro-sway-theme ~/.local/bin/manjaro-sway-theme
+
+# Crear desktop entry
+mkdir -p ~/.local/share/applications
+cat > ~/.local/share/applications/manjaro-sway-theme.desktop << 'EOF'
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Sway Theme Switcher
+GenericName=Theme Manager
+Comment=Interactive theme switcher for Sway window manager
+Exec=manjaro-sway-theme
+Icon=preferences-desktop-theme
+Terminal=false
+Categories=Settings;DesktopSettings;GTK;
+Keywords=theme;sway;appearance;colors;wayland;
+StartupNotify=true
+EOF
 
 # Verificar que ~/.local/bin esté en tu PATH
 echo $PATH | grep -q "$HOME/.local/bin" || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
@@ -426,6 +449,9 @@ Usa la herramienta `manjaro-sway-theme` para cambiar temas de forma visual:
 ```bash
 # Desde la terminal
 manjaro-sway-theme
+
+# Desde el launcher de aplicaciones
+# Busca "Sway Theme Switcher" en Rofi/dmenu
 
 # O presiona: Super + Shift + T (si configuraste el atajo)
 ```
