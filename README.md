@@ -238,7 +238,11 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 │   ├── 99-autostart-applications.conf  # Aplicaciones de inicio
 │   ├── clipboard.conf          # Configuración de portapapeles
 │   ├── menu.conf               # Configuración de rofi
-│   └── theme.conf              # Definición de colores y tema activo
+│   └── theme.conf              # Configuración de fuentes y tema GTK
+│
+├── definitions.d/              # Definiciones de tema activo
+│   ├── theme.conf              # Tema activo (colores y variables)
+│   └── theme.light.conf_       # Backup de tema claro
 │
 ├── inputs/                     # Configuración de dispositivos de entrada
 │   ├── default-keyboard        # Config de teclado
@@ -285,10 +289,10 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
     ├── catppuccin-mocha/
     ├── dracula/
     ├── matcha-blue/
-    ├── matcha-green/          # Tema activo
+    ├── matcha-green/
     ├── matcha-leaf/
     ├── matcha-red/
-    └── nordic-bluish-accent/
+    └── nordic-bluish-accent/  # Tema base activo (Nordic)
 ```
 
 ---
@@ -392,9 +396,11 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 
 Esta configuración incluye múltiples temas pre-configurados. Para cambiar de tema:
 
-1. Edita `~/.config/sway/config.d/90-enable-theme.conf`
-2. Cambia la línea `set $theme` al tema deseado
+1. Edita `~/.config/sway/definitions.d/theme.conf`
+2. Modifica las variables de color y tema según tus preferencias
 3. Recarga Sway con `Super + Shift + C`
+
+**Nota:** El tema activo se carga desde `definitions.d/theme.conf`, el cual es referenciado desde el archivo principal `config`. Puedes copiar cualquier tema de la carpeta `themes/` a este archivo para activarlo.
 
 ### Temas Disponibles
 
@@ -404,10 +410,10 @@ Esta configuración incluye múltiples temas pre-configurados. Para cambiar de t
 - **Catppuccin Mocha** - Oscuro con acentos vibrantes
 - **Dracula** - Clásico tema oscuro con morados
 - **Matcha Blue** - Verde azulado
-- **Matcha Green** - Verde natural (activo)
+- **Matcha Green** - Verde natural
 - **Matcha Leaf** - Verde hoja
 - **Matcha Red** - Rojo matcha
-- **Nordic Bluish Accent** - Estilo nórdico con azul
+- **Nordic Bluish Accent** - Estilo nórdico con azul (activo)
 
 Cada tema incluye:
 - Colores de ventanas y bordes
