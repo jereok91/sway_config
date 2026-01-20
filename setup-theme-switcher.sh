@@ -22,19 +22,35 @@ if echo "$PATH" | grep -q "$HOME/.local/bin"; then
 else
 	echo "⚠️  Adding ~/.local/bin to your PATH..."
 
+  echo $SHELL
+  echo $BASH_VERSION
+  SHELL_NAME="$(basename "$SHELL")"
+  REC_FILE=""
 	# Detect shell and add to appropriate rc file
-	if [ -n "$BASH_VERSION" ]; then
-		echo 'export PATH="$HOME/.local/bin:$PATH"' >>"$HOME/.bashrc"
-		echo "✅ Added to ~/.bashrc"
-	elif [ -n "$ZSH_VERSION" ]; then
-		echo 'export PATH="$HOME/.local/bin:$PATH"' >>"$HOME/.zshrc"
-		echo "✅ Added to ~/.zshrc"
-	else
-		echo 'export PATH="$HOME/.local/bin:$PATH"' >>"$HOME/.profile"
-		echo "✅ Added to ~/.profile"
-	fi
+	case "$SHELL_NAME" in
+  bash)
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
+    REC_FILE=".bashrc"
+    echo "✅ Añadido a ~/.bashrc"
+    ;;
+  zsh)
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.zshrc"
+    REC_FILE=".zshrc"
+    echo "✅ Añadido a ~/.zshrc"
+    ;;
+  fish)
+    mkdir -p "$HOME/.config/fish"
+    echo 'set -gx PATH $HOME/.local/bin $PATH' >> "$HOME/.config/fish/config.fish"
+    REC_FILE="config.fish"
+    echo "✅ Añadido a config.fish"
+    ;;
+  *)
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.profile"
+    echo "✅ Shell no reconocido. Añadido a ~/.profile"
+    ;;
+esac
 
-	echo "ℹ️  Please restart your shell or run: source ~/.bashrc (or your shell's rc file)"
+	echo "ℹ️  Please restart your shell or run: source $RREC_FILE (or your shell's rc file)"
 fi
 
 echo ""
