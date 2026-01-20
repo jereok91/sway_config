@@ -138,7 +138,7 @@ $bindsym $mod+n exec ~/.config/sway/scripts/first-empty-workspace.py --switch
 $bindsym $mod+Shift+n exec ~/.config/sway/scripts/first-empty-workspace.py --move
 
 ## Action // Move focused window to a new workspace and switch there ##
-$bindsym $mod+Shift+m exec /usr/share/sway/scripts/first-empty-workspace.py --move --switch
+$bindsym $mod+Shift+m exec ~/.config/sway/scripts/first-empty-workspace.py --move --switch
 
 
 # Layout stuff:

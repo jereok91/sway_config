@@ -249,8 +249,8 @@ bar {
 #                                                     #
 #######################################################
 
-# set $theme  ~/.config/way/themes/matcha-green
-# include $theme/theme.conf
+set $theme  ~/.config/sway/definitions.d/
+include $theme/theme.conf
 # Direction keys
 set $mod Mod4
 set $alt_mod Alt

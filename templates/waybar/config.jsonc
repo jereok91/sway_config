@@ -33,10 +33,11 @@
     "custom/playerctl",
     "custom/idle_inhibitor",
     "custom/dnd",
+    "custom/theme",
     "pulseaudio",
     "backlight",
     // system
-    "custom/theme",
+    // "custom/theme",
     "custom/adaptive-light",
     "custom/sunset",
     "custom/pacman",
@@ -193,11 +194,11 @@
     "signal": 6
   },
   "custom/theme": {
-    "format": "{icon}",
+    "format": " {icon} ",
     "interval": 300,
     "tooltip": true,
     "format-icons": {
-      "light": "",
+      "light": "",
       "dark": "",
       "auto_light": "󱩷",
       "auto_dark": "󱩸"

@@ -11,8 +11,8 @@ timeouts:
     command: swaymsg exec \$locking
   # keyboard_timeout
   - timeout: 600
-    command: /usr/share/sway/scripts/keyboard-backlight-switch.sh off
-    resume: /usr/share/sway/scripts/keyboard-backlight-switch.sh on
+    command: ~/.config/sway/scripts/scripts/keyboard-backlight-switch.sh off
+    resume: ~/.config/sway/scripts/scripts/keyboard-backlight-switch.sh on
   # screen_timeout
   - timeout: 600
     command: swaymsg "output * power off"
