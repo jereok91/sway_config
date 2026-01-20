@@ -134,6 +134,13 @@ git clone https://github.com/TU-USUARIO/sway-config.git ~/.config/sway
 
 Para usar el theme switcher interactivo como comando del sistema:
 
+**Opción A: Script automático (Recomendado)**
+```bash
+cd ~/.config/sway
+./setup-theme-switcher.sh
+```
+
+**Opción B: Manual**
 ```bash
 # Crear symlink en ~/.local/bin
 mkdir -p ~/.local/bin
@@ -241,6 +248,7 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 ├── idle.yaml                   # Configuración de swayidle
 ├── fondo.jpg                   # Wallpaper 1
 ├── fondo2.jpg                  # Wallpaper 2 (activo)
+├── setup-theme-switcher.sh     # Script de instalación del theme switcher
 │
 ├── config.d/                   # Configuraciones modulares
 │   ├── 10-keyboard.conf        # Layout de teclado
