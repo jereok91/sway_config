@@ -1,3 +1,6 @@
+set $localbin ~/.local/bin
+exec_always dbus-update-activation-environment --systemd PATH=$localbin:$PATH
+
 # Variables específicas para NVIDIA
 # Forzar ejecución con NVIDIA
 # Default config for sway
