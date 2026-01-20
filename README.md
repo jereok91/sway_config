@@ -130,7 +130,20 @@ git clone https://github.com/TU-USUARIO/sway-config.git ~/.config/sway
 
 ### 3. Instala las dependencias (ver sección siguiente)
 
-### 4. Recarga la configuración
+### 4. Habilitar el Theme Switcher (Opcional)
+
+Para usar el theme switcher interactivo como comando del sistema:
+
+```bash
+# Crear symlink en ~/.local/bin
+mkdir -p ~/.local/bin
+ln -sf ~/.config/sway/scripts/manjaro-sway-theme ~/.local/bin/manjaro-sway-theme
+
+# Verificar que ~/.local/bin esté en tu PATH
+echo $PATH | grep -q "$HOME/.local/bin" || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+```
+
+### 5. Recarga la configuración
 
 Si ya estás en Sway:
 ```bash
@@ -264,6 +277,7 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 │   ├── screenshot-notify.sh    # Notificaciones de screenshots
 │   ├── help.sh                 # Ayuda de atajos
 │   ├── theme-toggle.sh         # Cambio de temas
+│   ├── manjaro-sway-theme      # Theme switcher interactivo (GUI)
 │   ├── sunset.sh               # Control de wlsunset
 │   ├── wob.sh                  # Barra de progreso visual
 │   ├── checkupdates.sh         # Verificador de actualizaciones
@@ -387,6 +401,7 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 
 | Atajo | Descripción |
 |-------|-------------|
+| `Super + Shift + T` | Theme Switcher interactivo (si lo configuraste) |
 | Ver `~/.config/sway/modes/` | Atajos de modos especializados |
 | `Super + ?` | Mostrar ayuda de atajos (si está configurado) |
 
@@ -394,7 +409,27 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 
 ## 🎨 Temas Incluidos
 
-Esta configuración incluye múltiples temas pre-configurados. Para cambiar de tema:
+Esta configuración incluye múltiples temas pre-configurados con dos formas de cambiarlos:
+
+### Método 1: Theme Switcher Interactivo (Recomendado)
+
+Usa la herramienta `manjaro-sway-theme` para cambiar temas de forma visual:
+
+```bash
+# Desde la terminal
+manjaro-sway-theme
+
+# O presiona: Super + Shift + T (si configuraste el atajo)
+```
+
+Esta herramienta te permite:
+- ✅ Seleccionar un tema dark y un tema light usando Rofi
+- ✅ Elegir cuál será el tema primario
+- ✅ Instalar automáticamente dependencias del tema (si existen)
+- ✅ Aplicar el tema a Sway y Foot automáticamente
+- ✅ Recargar Sway sin reiniciar
+
+### Método 2: Manual
 
 1. Edita `~/.config/sway/definitions.d/theme.conf`
 2. Modifica las variables de color y tema según tus preferencias
@@ -477,6 +512,17 @@ Edita `~/.config/sway/config.d/99-autostart-applications.conf` y agrega:
 exec tu-aplicacion
 ```
 
+### Configurar Atajo para Theme Switcher
+
+Para agregar un atajo de teclado al theme switcher, edita `~/.config/sway/modes/default` y agrega:
+
+```bash
+## Launch // Theme Switcher ##
+bindsym $mod+Shift+t exec manjaro-sway-theme
+```
+
+Luego recarga Sway con `Super + Shift + C`.
+
 ---
 
 ## 🐛 Troubleshooting
@@ -541,6 +587,24 @@ sudo pacman -S ttf-roboto-mono-nerd
 # Agrega tu usuario al grupo video
 sudo usermod -aG video $USER
 # Cierra sesión y vuelve a entrar
+```
+
+### Theme Switcher no funciona
+
+```bash
+# Verifica que el script esté en el PATH
+which manjaro-sway-theme
+
+# Si no está, crea el symlink
+mkdir -p ~/.local/bin
+ln -sf ~/.config/sway/scripts/manjaro-sway-theme ~/.local/bin/manjaro-sway-theme
+
+# Verifica permisos de ejecución
+chmod +x ~/.config/sway/scripts/manjaro-sway-theme
+
+# Asegúrate de que ~/.local/bin esté en el PATH
+echo $PATH | grep -q "$HOME/.local/bin" || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
 ```
 
 ---
