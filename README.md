@@ -272,6 +272,7 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 ├── fondo.jpg                   # Wallpaper 1
 ├── fondo2.jpg                  # Wallpaper 2 (activo)
 ├── setup-theme-switcher.sh     # Script de instalación del theme switcher
+├── setup-swayidle.sh           # Setup del servicio systemd de swayidle
 │
 ├── config.d/                   # Configuraciones modulares
 │   ├── 10-keyboard.conf        # Layout de teclado
@@ -618,24 +619,31 @@ Además:
 ### Instalación de la unidad systemd
 
 La unidad se versiona en el repo bajo `systemd/user/swayidle.service`,
-pero systemd sólo lee `~/.config/systemd/user/`. Hay que enlazarla:
+pero systemd sólo lee `~/.config/systemd/user/`. El script
+`setup-swayidle.sh` (en la raíz del repo) automatiza todo: crea el
+symlink, parchea el include roto de `/etc/sway/autostart` si existe,
+recarga systemd, y habilita/arranca el servicio. Es **idempotente** y
+seguro de re-ejecutar.
 
 ```bash
-# Enlazar la unidad versionada al directorio real de systemd
+# Manual, una sola vez (o cada vez que se actualice el repo)
+~/.config/sway/setup-swayidle.sh
+```
+
+```bash
+# Lo que hace internamente:
 mkdir -p ~/.config/systemd/user
 ln -sf ~/.config/sway/systemd/user/swayidle.service \
        ~/.config/systemd/user/swayidle.service
-
-# Recargar systemd y activar el servicio
 systemctl --user daemon-reload
 systemctl --user enable --now swayidle
-
-# Verificar
-systemctl --user status swayidle
 ```
 
-Sway activa este servicio en cada arranque desde `autostart` (línea
-`$initialize_idle_daemon`) y desde `config.d/99-autostart-applications.conf`.
+Sway ejecuta este script automáticamente en cada arranque desde
+`autostart` (variable `$initialize_idle_daemon`) y desde
+`config.d/99-autostart-applications.conf`, así que tras un `git pull`
+no hace falta correrlo a mano: la próxima vez que inicies o recargues
+Sway, el script detectará cualquier unidad nueva y la enlazará.
 
 ### Inhibir el idle desde Waybar
 
@@ -734,7 +742,15 @@ sudo usermod -aG video $USER
 ### La pantalla no se bloquea sola / no se apaga la pantalla
 
 Síntomas: swayidle nunca ejecuta el `lock.sh` ni el `dpms off`, aunque
-los timeouts del servicio parezcan correctos. Causas típicas:
+los timeouts del servicio parezcan correctos. Lo más rápido es
+re-ejecutar el script de setup, que se autocorrige:
+
+```bash
+~/.config/sway/setup-swayidle.sh
+systemctl --user status swayidle
+```
+
+Si aun así no funciona, causas típicas:
 
 1. **El servicio `swayidle` no está activo** (el más común):
    ```bash
@@ -756,8 +772,9 @@ los timeouts del servicio parezcan correctos. Causas típicas:
    ```
 
 3. **`autostart` no se está cargando** porque el include apunta a
-   `/etc/sway/autostart`, archivo que no existe. Verifica que tu
-   `config` diga:
+   `/etc/sway/autostart`, archivo que no existe. El script
+   `setup-swayidle.sh` corrige esto automáticamente, o podés
+   editarlo a mano. Verifica que tu `config` diga:
    ```
    include ~/.config/sway/autostart
    ```
