@@ -350,7 +350,7 @@ set $bluetooth $script_path/once.sh $term_float bluetuith
 
 ### Autostart applications definition.
 # Can be removed soon-ish as it is being imported in userspace.
-include /etc/sway/autostart
+include ~/.config/sway/autostart
 
 # Hide cursor after 5 seconds of inactivty
 seat seat0 hide_cursor 5000
