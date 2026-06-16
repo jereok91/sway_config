@@ -327,6 +327,14 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 │       ├── color.css
 │       └── README.md
 │
+├── systemd/                    # Unidades systemd versionadas
+│   └── user/
+│       └── swayidle.service    # Servicio de swayidle (ver § Idle y Bloqueo)
+│
+│   ⚠️  Estas unidades viven en el repo pero deben enlazarse a
+│   ~/.config/systemd/user/ para que systemd las cargue. Ver
+│   la sección "Idle y Bloqueo de Pantalla" más abajo.
+│
 └── themes/                     # Temas disponibles
     ├── catppuccin-frappe/
     ├── catppuccin-latte/
@@ -559,6 +567,106 @@ Luego recarga Sway con `Super + Shift + C`.
 
 ---
 
+## 🔒 Idle y Bloqueo de Pantalla
+
+El comportamiento de inactividad y bloqueo se gestiona con **swayidle**
+arrancado como servicio de systemd del usuario, complementado con
+**systemd-inhibit** desde un script de Waybar para inhibir el idle
+temporalmente (útil durante presentaciones o vídeos).
+
+### ¿Cómo funciona?
+
+```
+┌──────────────────┐    timeout 300    ┌──────────────────┐
+│  swayidle (240s) │ ────────────────▶ │  $locking        │  → lock.sh
+│  (servicio user) │                   │  (lock + dpms)   │
+└──────────────────┘                   └──────────────────┘
+        ▲
+        │ systemd-inhibit --what=idle
+        │ (inhibit-idle desde Waybar)
+```
+
+- **swayidle** lee los timeouts definidos en `systemd/user/swayidle.service`
+  y dispara los comandos correspondientes al cumplirse cada `timeout`.
+- **`lock.sh`** (`scripts/lock.sh`) decide el locker real en función de
+  lo que tengas instalado: `gtklock` → `waylock` → `swaylock-effects` →
+  `swaylock` plano.
+- **Inhibir el idle** desde el icono de Waybar (`custom/idle_inhibitor`)
+  lanza `systemd-inhibit --what=idle ... sleep N` en segundo plano;
+  mientras ese proceso esté vivo, swayidle **no** dispara el lock ni el
+  dpms. Al expirar el tiempo o al pulsar click central, la inhibición
+  se libera y swayidle vuelve a controlar el sistema.
+
+### Timeouts configurados (swayidle.service)
+
+| Tiempo (s) | Acción                                          |
+|-----------:|-------------------------------------------------|
+| **240**    | Bajar brillo a 10% (restaurar al reanudar)      |
+| **300**    | Bloquear pantalla (`lock.sh`)                   |
+| **600**    | Apagar retroiluminación de teclado (restaurar)  |
+| **600**    | `output * power off` (restaurar al reanudar)    |
+| **600**    | `output * dpms off` (restaurar al reanudar)     |
+| **900**    | `systemctl sleep` si está en batería            |
+| **3600**   | `systemctl sleep` si está en corriente          |
+
+Además:
+
+- `before-sleep`: bloquea la pantalla antes de suspender.
+- `after-resume`: reactiva dpms y restaura el brillo.
+- `lock`: bloquea al recibir señal explícita.
+
+### Instalación de la unidad systemd
+
+La unidad se versiona en el repo bajo `systemd/user/swayidle.service`,
+pero systemd sólo lee `~/.config/systemd/user/`. Hay que enlazarla:
+
+```bash
+# Enlazar la unidad versionada al directorio real de systemd
+mkdir -p ~/.config/systemd/user
+ln -sf ~/.config/sway/systemd/user/swayidle.service \
+       ~/.config/systemd/user/swayidle.service
+
+# Recargar systemd y activar el servicio
+systemctl --user daemon-reload
+systemctl --user enable --now swayidle
+
+# Verificar
+systemctl --user status swayidle
+```
+
+Sway activa este servicio en cada arranque desde `autostart` (línea
+`$initialize_idle_daemon`) y desde `config.d/99-autostart-applications.conf`.
+
+### Inhibir el idle desde Waybar
+
+El módulo `custom/idle_inhibitor` (ver `templates/waybar/config.jsonc`)
+ejecuta `scripts/inhibit-idle`:
+
+- **Click izquierdo**: cancela la inhibición actual y abre el menú de
+  Rofi para elegir una nueva duración (1, 10, 15, 20, 30, 45, 60, 90,
+  120 min o *Unlimited*).
+- **Click central**: cancela la inhibición inmediatamente.
+- El icono cambia entre `󰒲` (inactivo) y `󰒳` (inhibiendo).
+
+También hay un atajo de teclado directo: `Super + Shift + I` ejecuta
+`inhibit-idle interactive` (ver `modes/default`).
+
+### Relación con `idle.yaml`
+
+El archivo `idle.yaml` es la configuración *legible* de los timeouts,
+pero **no se lee directamente**: el binario `swayidle-conf` (que
+traduce yaml a argumentos de swayidle) **no forma parte** de los
+paquetes oficiales. La fuente de verdad es la unidad
+`systemd/user/swayidle.service`, que refleja los mismos valores.
+Si modificas los timeouts, edita el `.service` y recarga:
+
+```bash
+systemctl --user daemon-reload
+systemctl --user restart swayidle
+```
+
+---
+
 ## 🐛 Troubleshooting
 
 ### Sway no arranca
@@ -622,6 +730,47 @@ sudo pacman -S ttf-roboto-mono-nerd
 sudo usermod -aG video $USER
 # Cierra sesión y vuelve a entrar
 ```
+
+### La pantalla no se bloquea sola / no se apaga la pantalla
+
+Síntomas: swayidle nunca ejecuta el `lock.sh` ni el `dpms off`, aunque
+los timeouts del servicio parezcan correctos. Causas típicas:
+
+1. **El servicio `swayidle` no está activo** (el más común):
+   ```bash
+   systemctl --user status swayidle
+   # Si está "inactive", activar y arrancar:
+   systemctl --user enable --now swayidle
+   ```
+
+2. **Falta la unidad o el symlink**:
+   ```bash
+   ls -l ~/.config/systemd/user/swayidle.service
+   # Debe apuntar a ~/.config/sway/systemd/user/swayidle.service
+   # Si no existe, recrear el symlink:
+   mkdir -p ~/.config/systemd/user
+   ln -sf ~/.config/sway/systemd/user/swayidle.service \
+          ~/.config/systemd/user/swayidle.service
+   systemctl --user daemon-reload
+   systemctl --user enable --now swayidle
+   ```
+
+3. **`autostart` no se está cargando** porque el include apunta a
+   `/etc/sway/autostart`, archivo que no existe. Verifica que tu
+   `config` diga:
+   ```
+   include ~/.config/sway/autostart
+   ```
+   y **no** `include /etc/sway/autostart`. Sin esto,
+   `$initialize_idle_daemon` nunca queda definido y el servicio no
+   se levanta en cada arranque de Sway.
+
+4. **Hay un inhibidor activo** (`systemd-inhibit --what=idle`). Si
+   dejaste corriendo el inhibidor de Waybar o un `caffeine`-like, la
+   inhibición bloquea el lock aun con swayidle funcionando. Revisa:
+   ```bash
+   systemd-inhibit --list
+   ```
 
 ### Theme Switcher no funciona
 
