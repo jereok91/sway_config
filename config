@@ -1,7 +1,17 @@
 set $localbin ~/.local/bin
 exec_always dbus-update-activation-environment --systemd PATH=$localbin:$PATH
 
-# Variables específicas para NVIDIA
+
+exec_always dbus-update-activation-environment --systemd \
+  XDG_CURRENT_DESKTOP=sway \
+  XDG_SESSION_DESKTOP=sway \
+  XDG_SESSION_TYPE=wayland# Variables específicas para NVIDIA
+
+exec systemctl --user restart xdg-desktop-portal
+exec systemctl --user restart pipewire
+
+
+
 # Forzar ejecución con NVIDIA
 # Default config for sway
 #
@@ -36,7 +46,7 @@ set $kittyTerminal kitty
 #
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
 # output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
-output * bg ~/.config/sway/fondo2.jpg fill
+output * bg ~/.config/sway/fondo3.jpg fill
 #
 # Example configuration:
 #
