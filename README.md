@@ -607,14 +607,23 @@ temporalmente (útil durante presentaciones o vídeos).
 | **600**    | Apagar retroiluminación de teclado (restaurar)  |
 | **600**    | `output * power off` (restaurar al reanudar)    |
 | **600**    | `output * dpms off` (restaurar al reanudar)     |
-| **900**    | `systemctl sleep` si está en batería            |
-| **3600**   | `systemctl sleep` si está en corriente          |
+| **1800**   | `systemctl suspend` (suspender el sistema)      |
 
 Además:
 
 - `before-sleep`: bloquea la pantalla antes de suspender.
 - `after-resume`: reactiva dpms y restaura el brillo.
 - `lock`: bloquea al recibir señal explícita.
+
+> **Nota sobre batería vs corriente:** en este repo se usa un único
+> timeout de 1800s para suspender. El diseño original diferenciaba
+> entre batería (900s) y corriente (3600s) usando `acpi`, pero
+> `acpi` no es un paquete de los repos oficiales y muchas máquinas
+> (sobre todo desktops) no exponen `/sys/class/power_supply/AC*/`,
+> por lo que la comprobación fallaba silenciosamente y la suspensión
+> nunca se disparaba. Si tenés un portátil y querés distintos
+> tiempos para batería y corriente, podés reemplazar el `timeout
+> 1800` por un script propio que lea `cat /sys/class/power_supply/*/online`.
 
 ### Instalación de la unidad systemd
 
@@ -788,6 +797,29 @@ Si aun así no funciona, causas típicas:
    ```bash
    systemd-inhibit --list
    ```
+
+### La pantalla se apaga pero el sistema nunca suspende
+
+Síntoma: el timeout de 600s apaga la pantalla (dpms off funciona),
+pero la máquina nunca llega a `suspend` aunque pase una hora.
+
+Causa típica: el `timeout 900/3600` original usaba `acpi --ac-adapter`
+para distinguir batería de corriente, y luego llamaba a `systemctl
+sleep`. Pero `acpi` no es un paquete de los repos oficiales y muchos
+sistemas (desktops, en particular) no exponen info de AC en
+`/sys/class/power_supply/`. En ese caso el comando falla
+silenciosamente y la suspensión nunca se dispara.
+
+Verificación:
+```bash
+command -v acpi          # si no devuelve nada, acpi no está instalado
+ls /sys/class/power_supply/   # si está vacío, no hay info de batería/AC
+```
+
+Solución: el `systemd/user/swayidle.service` versionado usa un único
+`timeout 1800 'systemctl suspend'` que no depende de `acpi`. Si
+modificaste el `.service` para reintroducir la lógica de batería,
+volvé a correr `setup-swayidle.sh` o reemplazá esa línea.
 
 ### Theme Switcher no funciona
 

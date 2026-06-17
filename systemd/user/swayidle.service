@@ -16,8 +16,7 @@ ExecStart=/usr/bin/swayidle -w \
                 resume 'swaymsg "output * power on"' \
     timeout 600 'swaymsg "output * dpms off"' \
                 resume 'swaymsg "output * dpms on"' \
-    timeout 900 'sh -c "acpi --ac-adapter | grep -v on-line && systemctl sleep"' \
-    timeout 3600 'sh -c "acpi --ac-adapter | grep on-line && systemctl sleep"' \
+    timeout 1800 'systemctl suspend' \
     before-sleep 'swaymsg exec %h/.config/sway/scripts/lock.sh' \
     after-resume 'swaymsg "output * dpms on" && brightnessctl -r' \
     lock 'swaymsg exec %h/.config/sway/scripts/lock.sh'
