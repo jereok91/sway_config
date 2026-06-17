@@ -774,11 +774,34 @@ $EDITOR ~/.config/sway/sworkstyle/config.toml
 '/^[─]?(Nvim|Vim|NVIM|VIM)/' = ''
 ```
 
-**Agregar tu propia app:** copiá una línea existente, cambiá el
-`app_id` (lo ves en los warnings del journal:
-`journalctl --user -u sworkstyle | grep "No match"`) y elegí un
-glifo de [Nerd Font Cheat Sheet](https://www.nerdfonts.com/cheat-sheet).
-Pegá el glifo literal entre las comillas.
+**Para obtener el `app_id` o `class` de una ventana abierta**, usá
+el script `scripts/sway-window-info.sh`:
+
+```bash
+# Listar todas las ventanas
+~/.config/sway/scripts/sway-window-info.sh
+
+# Filtrar por nombre (case-insensitive)
+~/.config/sway/scripts/sway-window-info.sh mongodb
+~/.config/sway/scripts/sway-window-info.sh dbeaver
+
+# Salida JSON cruda (para scripts)
+~/.config/sway/scripts/sway-window-info.sh --json
+```
+
+El script te muestra `app_id`, `class`, `instance`, `title` y `pid`
+de cada ventana, y al final te sugiere la línea exacta para copiar
+al config.
+
+**Elegir el icono:** andá a [Nerd Font Cheat Sheet](https://www.nerdfonts.com/cheat-sheet),
+buscá un glifo (Material Design, Seti, dev, etc.), copialo y pegá
+el carácter literal entre las comillas del config.
+
+**Tip:** para encontrar `app_id`s que no matchean (los que sworkstyle
+no conoce), revisá los warnings del journal:
+```bash
+journalctl --user -u sworkstyle -n 50 | grep "No match"
+```
 
 ### ¿Por qué un servicio systemd?
 

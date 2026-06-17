@@ -29,6 +29,7 @@ separator = ' '
 'gvim'        = ''   # nf-dev-vim
 'vim'         = ''
 'nvim'        = ''
+'mongodb-compass'     = ''
 
 # nvim/vim running INSIDE any terminal: match by window title.
 # (the app_id will be the terminal itself, e.g. 'foot', so we
@@ -59,6 +60,16 @@ separator = ' '
 'teams-for-linux'     = '󰊻'   # nf-md-microsoft_teams
 'microsoft-teams'     = '󰊻'
 'elecwhat'            = '󰖣'   # nf-md-forum (WhatsApp client)
+
+# Databases / dev tools
+'DBeaver'            = ''   # nf-md-table (SQL client)
+'MongoDB Compass'    = ''   # nf-md-database
+'mongodb compass'    = ''   # instance match
+'MongoDBCompass'     = ''
+'mongosh'            = ''   # mongo shell
+'mongo'              = ''
+# MongoDB Compass CLI running inside a terminal: match by title
+'/mongodb-compass|mongosh|mongo --/'  = ''
 
 # Files / system
 'pcmanfm'         = ''   # nf-md-folder
