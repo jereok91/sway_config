@@ -1,12 +1,15 @@
 #!/bin/bash
 # setup-sworkstyle.sh
-# One-shot setup for the sworkstyle systemd integration.
+# One-shot setup for the sworkstyle integration.
 #
 # This script:
 #   1. Creates the symlink ~/.config/systemd/user/sworkstyle.service
 #      -> ~/.config/sway/systemd/user/sworkstyle.service so systemd
 #      can find the unit tracked in this repo.
-#   2. Reloads the systemd user daemon and enables + starts the
+#   2. Creates the symlink ~/.config/sworkstyle/config.toml
+#      -> ~/.config/sway/sworkstyle/config.toml so the config
+#      edits stay in the repo.
+#   3. Reloads the systemd user daemon and enables + starts the
 #      sworkstyle.service.
 #
 # It is safe to re-run: existing symlinks are preserved.
@@ -28,6 +31,10 @@ SERVICE_SRC="$REPO_DIR/systemd/user/sworkstyle.service"
 SERVICE_DST_DIR="$HOME/.config/systemd/user"
 SERVICE_DST="$SERVICE_DST_DIR/sworkstyle.service"
 
+CONFIG_SRC="$REPO_DIR/sworkstyle/config.toml"
+CONFIG_DST_DIR="$HOME/.config/sworkstyle"
+CONFIG_DST="$CONFIG_DST_DIR/config.toml"
+
 # Coloured output
 if [ -t 1 ]; then
     GREEN='\033[0;32m'
@@ -44,6 +51,40 @@ ok()    { printf "  ${GREEN}✓${NC} %s\n" "$*"; }
 warn()  { printf "  ${YELLOW}⚠${NC}  %s\n" "$*"; }
 fail()  { printf "  ${RED}✗${NC} %s\n" "$*" >&2; }
 
+# Helper: link a file from the repo to a target path, handling
+# existing symlinks/files gracefully. Args: <src> <dst> <label>
+link_from_repo() {
+    local src="$1"
+    local dst="$2"
+    local label="$3"
+
+    if [ ! -f "$src" ]; then
+        warn "$label: source not found ($src), skipping"
+        return 0
+    fi
+
+    if [ -L "$dst" ]; then
+        local target
+        target="$(readlink -f "$dst")"
+        if [ "$target" = "$src" ]; then
+            ok "$label: symlink already in place"
+        else
+            warn "$label: symlink points to $target, expected $src. Re-linking."
+            ln -sf "$src" "$dst"
+            ok "$label: symlink re-created"
+        fi
+    elif [ -e "$dst" ]; then
+        warn "$label: $dst exists and is not a symlink. Backing up to ${dst}.bak"
+        mv "$dst" "${dst}.bak"
+        ln -sf "$src" "$dst"
+        ok "$label: replaced with symlink"
+    else
+        mkdir -p "$(dirname "$dst")"
+        ln -sf "$src" "$dst"
+        ok "$label: created symlink"
+    fi
+}
+
 echo "🎨 Swayest Workstyle setup"
 
 # ----------------------------------------------------------------------------
@@ -59,40 +100,16 @@ fi
 ok "Found $(command -v sworkstyle)"
 
 # ----------------------------------------------------------------------------
-# 1. Sanity check: the versioned unit must exist in the repo
+# 1. Link the systemd unit
 # ----------------------------------------------------------------------------
-step "1. Verify the versioned service file"
-if [ ! -f "$SERVICE_SRC" ]; then
-    fail "Source service not found: $SERVICE_SRC"
-    echo "      Re-clone the repo or restore systemd/user/sworkstyle.service."
-    exit 1
-fi
-ok "Found $SERVICE_SRC"
+step "1. Link systemd unit"
+link_from_repo "$SERVICE_SRC" "$SERVICE_DST" "service"
 
 # ----------------------------------------------------------------------------
-# 2. Create the symlink so systemd can load the unit
+# 2. Link the user config
 # ----------------------------------------------------------------------------
-step "2. Create symlink in ~/.config/systemd/user/"
-mkdir -p "$SERVICE_DST_DIR"
-
-if [ -L "$SERVICE_DST" ]; then
-    TARGET="$(readlink -f "$SERVICE_DST")"
-    if [ "$TARGET" = "$SERVICE_SRC" ]; then
-        ok "Symlink already in place"
-    else
-        warn "Symlink points to $TARGET, expected $SERVICE_SRC. Re-linking."
-        ln -sf "$SERVICE_SRC" "$SERVICE_DST"
-        ok "Symlink re-created"
-    fi
-elif [ -e "$SERVICE_DST" ]; then
-    warn "$SERVICE_DST exists and is not a symlink. Backing up to ${SERVICE_DST}.bak"
-    mv "$SERVICE_DST" "${SERVICE_DST}.bak"
-    ln -sf "$SERVICE_SRC" "$SERVICE_DST"
-    ok "Replaced with symlink"
-else
-    ln -sf "$SERVICE_SRC" "$SERVICE_DST"
-    ok "Created symlink"
-fi
+step "2. Link user config (~/.config/sworkstyle/config.toml)"
+link_from_repo "$CONFIG_SRC" "$CONFIG_DST" "config"
 
 # ----------------------------------------------------------------------------
 # 3. Reload systemd user daemon
@@ -141,4 +158,4 @@ if command -v systemctl >/dev/null 2>&1; then
 fi
 
 printf "\n${GREEN}✅ Setup complete.${NC}\n"
-printf "   Re-run this script any time you update %s.\n" "$SERVICE_SRC"
+printf "   Re-run this script any time you update %s or %s.\n" "$SERVICE_SRC" "$CONFIG_SRC"

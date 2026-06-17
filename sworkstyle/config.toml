@@ -1,0 +1,85 @@
+# Sworkstyle config
+# Format:
+#   '{app_id_or_class}' = '{icon}'    (exact match on app_id / X11 class)
+#   '/{regex}/'         = '{icon}'    (regex match on window title)
+#
+# Icons are Nerd Font v3 glyphs. The same Nerd Font must be
+# configured in waybar/style.css for them to render.
+#
+# To find glyphs: https://www.nerdfonts.com/cheat-sheet
+#
+# sworkstyle auto-reloads this file on change.
+
+fallback  = ''   # nf-md-file_document
+separator = ' '
+
+[matching]
+# Terminals
+'foot'        = ''   # nf-linux-foot
+'footclient'  = ''
+'alacritty'   = ''   # nf-linux-alacritty
+'kitty'       = ''   # nf-linux-kitty
+'wezterm'     = ''   # nf-linux-wezterm
+
+# Editors / dev tools (exact app_id match)
+'code'        = ''   # nf-seti-visual_studio_code (VS Code)
+'code-oss'    = ''
+'sublime_text'= ''   # nf-seti-sublime
+'neovide'     = ''   # nf-dev-neovim
+'gvim'        = ''   # nf-dev-vim
+
+# nvim/vim running INSIDE any terminal: match by window title.
+# (the app_id will be the terminal itself, e.g. 'foot', so we
+# have to inspect the title set by nvim to detect it.)
+'/^[\u2500]?(Nvim|Vim|NVIM|VIM)/' = ''   # nf-dev-neovim
+'/lazygit|Lazygit|LAZYGIT/'  = ''   # nf-md-source_branch
+
+# Browsers
+'firefox'         = ''   # nf-md-firefox
+'firefox-esr'     = ''
+'chromium'        = ''   # nf-md-google_chrome
+'chrome'          = ''
+'google-chrome'   = ''
+'brave-browser'   = ''   # reuse chrome glyph
+'Brave-browser'   = ''
+'thorium-browser' = ''
+'librewolf'       = ''
+'zen-browser'     = ''
+
+# Chat / mail
+'discord'             = ''   # nf-md-discord
+'discord-canary'      = ''
+'Element'             = ''
+'Slack'               = ''   # nf-md-slack
+'telegram-desktop'    = ''   # nf-md-telegram
+'org.telegram.desktop'= ''
+'thunderbird'         = ''   # nf-md-thunderbird
+'teams-for-linux'     = ''   # nf-md-microsoft_teams
+'microsoft-teams'     = ''
+'elecwhat'            = ''   # nf-md-forum (WhatsApp client)
+
+# Files / system
+'pcmanfm'         = ''   # nf-md-folder
+'pcmanfm-qt'      = ''
+'nautilus'        = ''
+'dolphin'         = ''
+'thunar'          = ''
+'btop'            = ''   # nf-cod-terminal_badge
+'pulsemixer'      = ''   # nf-md-volume_medium
+'bluetuith'       = ''   # nf-md-bluetooth
+'calcurse'        = ''   # nf-md-calendar
+'lf'              = ''   # nf-md-folder_open
+'ranger'          = ''
+'yazi'            = ''
+
+# Wayland / Sway helpers
+'wluma'           = ''   # nf-md-white_balance_sunny
+'wlsunset'        = ''   # nf-md-weather_sunset
+'nm-connection-editor' = ''   # nf-md-network
+'manjaro-settings-manager' = ''   # nf-md-wrench
+'Manjaro.manjaro-settings-manager' = ''
+'swappy'          = ''   # nf-md-image
+
+# Generic catch-alls
+'/Electron/'             = ''   # nf-md-monitor
+'/^Picture.in.picture$/i'= ''   # nf-md-picture_in_picture

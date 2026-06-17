@@ -341,6 +341,10 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 │   servicio tiene su script de setup (setup-swayidle.sh,
 │   setup-sworkstyle.sh) que se ejecuta desde el autostart de Sway.
 │
+├── sworkstyle/                 # Config de sworkstyle versionada
+│   └── config.toml             # Mapeo de app_id/título → iconos Nerd Font
+│                                (enlazada a ~/.config/sworkstyle/config.toml)
+│
 └── themes/                     # Temas disponibles
     ├── catppuccin-frappe/
     ├── catppuccin-latte/
@@ -746,16 +750,31 @@ pgrep -af sworkstyle
 
 ### Configuración personalizada
 
-`sworkstyle` usa la config por defecto del paquete
-(`/usr/share/sworkstyle/config.toml`) con mapeos de app_id / class
-a iconos Nerd Font. Para personalizarla:
+El repo incluye un config de sworkstyle en
+`~/.config/sway/sworkstyle/config.toml`, enlazado a
+`~/.config/sworkstyle/config.toml` por `setup-sworkstyle.sh`. Editá
+el archivo versionado directamente:
 
 ```bash
-mkdir -p ~/.config/sworkstyle
-cp /usr/share/sworkstyle/config.toml ~/.config/sworkstyle/config.toml
-$EDITOR ~/.config/sworkstyle/config.toml
-systemctl --user restart sworkstyle
+$EDITOR ~/.config/sway/sworkstyle/config.toml
+# sworkstyle recarga automáticamente al detectar el cambio
 ```
+
+**Formato de cada entrada:**
+
+```toml
+# Match exacto por app_id o X11 class
+'foot' = ''
+
+# Match por título (regex), entre /.../
+'/^[─]?(Nvim|Vim|NVIM|VIM)/' = ''
+```
+
+**Agregar tu propia app:** copiá una línea existente, cambiá el
+`app_id` (lo ves en los warnings del journal:
+`journalctl --user -u sworkstyle | grep "No match"`) y elegí un
+glifo de [Nerd Font Cheat Sheet](https://www.nerdfonts.com/cheat-sheet).
+Pegá el glifo literal entre las comillas.
 
 ### ¿Por qué un servicio systemd?
 
