@@ -10,7 +10,7 @@
 #
 # sworkstyle auto-reloads this file on change.
 
-fallback  = ''   # nf-md-file_document
+fallback  = '󰘔'   # nf-md-file_document
 separator = ' '
 
 [matching]
@@ -18,7 +18,7 @@ separator = ' '
 'foot'        = ''   # nf-linux-foot
 'footclient'  = ''
 'alacritty'   = ''   # nf-linux-alacritty
-'kitty'       = ''   # nf-linux-kitty
+'kitty'       = '󰄛'   # nf-linux-kitty
 'wezterm'     = ''   # nf-linux-wezterm
 
 # Editors / dev tools (exact app_id match)
@@ -27,6 +27,8 @@ separator = ' '
 'sublime_text'= ''   # nf-seti-sublime
 'neovide'     = ''   # nf-dev-neovim
 'gvim'        = ''   # nf-dev-vim
+'vim'         = ''
+'nvim'        = ''
 
 # nvim/vim running INSIDE any terminal: match by window title.
 # (the app_id will be the terminal itself, e.g. 'foot', so we
@@ -35,28 +37,28 @@ separator = ' '
 '/lazygit|Lazygit|LAZYGIT/'  = ''   # nf-md-source_branch
 
 # Browsers
-'firefox'         = ''   # nf-md-firefox
+'firefox'         = ''   # nf-md-firefox
 'firefox-esr'     = ''
-'chromium'        = ''   # nf-md-google_chrome
-'chrome'          = ''
-'google-chrome'   = ''
-'brave-browser'   = ''   # reuse chrome glyph
-'Brave-browser'   = ''
+'chromium'        = '󰊯'   # nf-md-google_chrome
+'chrome'          = ''
+'google-chrome'   = ''
+'brave-browser'   = ''   # reuse chrome glyph
+'Brave-browser'   = ''
 'thorium-browser' = ''
 'librewolf'       = ''
 'zen-browser'     = ''
 
 # Chat / mail
-'discord'             = ''   # nf-md-discord
+'discord'             = ''   # nf-md-discord
 'discord-canary'      = ''
 'Element'             = ''
 'Slack'               = ''   # nf-md-slack
-'telegram-desktop'    = ''   # nf-md-telegram
-'org.telegram.desktop'= ''
-'thunderbird'         = ''   # nf-md-thunderbird
+'telegram-desktop'    = ''   # nf-md-telegram
+'org.telegram.desktop'= ''
+'thunderbird'         = ''   # nf-md-thunderbird
 'teams-for-linux'     = ''   # nf-md-microsoft_teams
-'microsoft-teams'     = ''
-'elecwhat'            = ''   # nf-md-forum (WhatsApp client)
+'microsoft-teams'     = '󰊻'
+'elecwhat'            = ''   # nf-md-forum (WhatsApp client)
 
 # Files / system
 'pcmanfm'         = ''   # nf-md-folder
