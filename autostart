@@ -3,7 +3,7 @@
 set $initialize_foot_server '[ -x "$(command -v foot)" ] && systemctl --now --user enable foot-server.socket && systemctl --now --user enable foot-server'
 set $initialize_swayr_daemon '[ -x "$(command -v swayrd)" ] && systemctl --now --user enable swayrd'
 set $initialize_waybar '[ -x "$(command -v waybar)" ] && (pkill -U $USER waybar || exit 0) && systemctl --now --user enable waybar && (systemctl --user start waybar || ~/.config/sway/scripts/waybar.sh)'
-set $initialize_workspace_icons '[ -x "$(command -v sworkstyle)" ] && systemctl --now --user enable sworkstyle'
+set $initialize_workspace_icons '~/.config/sway/setup-sworkstyle.sh'
 set $initialize_poweralert_daemon '[ -x "$(command -v poweralertd)" ] && systemctl --now --user enable poweralertd'
 set $initialize_idlehack_daemon '[ -x "$(command -v idlehack)" ] && systemctl --now --user enable idlehack'
 set $initialize_idle_daemon '~/.config/sway/setup-swayidle.sh'

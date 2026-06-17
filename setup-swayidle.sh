@@ -19,7 +19,10 @@ set -e
 # it is invoked from (autostart, terminal, etc.).
 SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
 SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
-REPO_DIR="$(dirname "$SCRIPT_DIR")"
+
+# The script lives at the root of the repo (~/.../sway/setup-swayidle.sh),
+# so the repo dir is the script dir itself.
+REPO_DIR="$SCRIPT_DIR"
 
 SERVICE_SRC="$REPO_DIR/systemd/user/swayidle.service"
 SERVICE_DST_DIR="$HOME/.config/systemd/user"

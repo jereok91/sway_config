@@ -17,6 +17,7 @@ Una configuración completa y lista para producción de **Sway** (i3-compatible 
 - [Atajos de Teclado](#-atajos-de-teclado)
 - [Temas Incluidos](#-temas-incluidos)
 - [Configuración Personalizada](#-configuración-personalizada)
+- [Iconos de Workspace (sworkstyle)](#-iconos-de-workspace-sworkstyle)
 - [Troubleshooting](#-troubleshooting)
 
 ---
@@ -270,9 +271,11 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 ├── autostart                   # Definiciones de aplicaciones al inicio
 ├── idle.yaml                   # Configuración de swayidle
 ├── fondo.jpg                   # Wallpaper 1
-├── fondo2.jpg                  # Wallpaper 2 (activo)
+├── fondo2.jpg                  # Wallpaper 2
+├── fondo3.jpg                  # Wallpaper 3 (activo)
 ├── setup-theme-switcher.sh     # Script de instalación del theme switcher
 ├── setup-swayidle.sh           # Setup del servicio systemd de swayidle
+├── setup-sworkstyle.sh         # Setup del servicio systemd de sworkstyle
 │
 ├── config.d/                   # Configuraciones modulares
 │   ├── 10-keyboard.conf        # Layout de teclado
@@ -330,11 +333,13 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 │
 ├── systemd/                    # Unidades systemd versionadas
 │   └── user/
-│       └── swayidle.service    # Servicio de swayidle (ver § Idle y Bloqueo)
+│       ├── swayidle.service    # Servicio de swayidle (ver § Idle y Bloqueo)
+│       └── sworkstyle.service  # Servicio de sworkstyle (ver § Iconos de Workspace)
 │
 │   ⚠️  Estas unidades viven en el repo pero deben enlazarse a
-│   ~/.config/systemd/user/ para que systemd las cargue. Ver
-│   la sección "Idle y Bloqueo de Pantalla" más abajo.
+│   ~/.config/systemd/user/ para que systemd las cargue. Cada
+│   servicio tiene su script de setup (setup-swayidle.sh,
+│   setup-sworkstyle.sh) que se ejecuta desde el autostart de Sway.
 │
 └── themes/                     # Temas disponibles
     ├── catppuccin-frappe/
@@ -505,13 +510,25 @@ Cada tema incluye:
 
 ### Cambiar el Wallpaper
 
-Edita el archivo `~/.config/sway/config`:
+El wallpaper se controla desde `definitions.d/theme.conf` mediante
+la variable `$background`. Editá esa única línea:
 
 ```bash
-output * bg ~/.config/sway/TU_IMAGEN.jpg fill
+# ~/.config/sway/definitions.d/theme.conf
+set $background ~/.config/sway/fondo3.jpg
+# o la imagen que quieras:
+set $background /ruta/a/tu/wallpaper.png
 ```
 
-O coloca tu imagen en `~/.config/sway/` y actualiza la ruta.
+Luego recargá Sway (`Super+Shift+C` o `swaymsg reload`) y el fondo
+se actualiza. Como `$apply_background` corre en `exec_always`, el
+cambio también se aplica en cada reload automáticamente.
+
+> **Nota:** la línea `output * bg` en `~/.config/sway/config`
+> (línea 49) es un fallback estático que sólo se usa si
+> `$background` no resuelve a un archivo existente. Para un
+> wallpaper fijo, podés editar esa línea directamente, pero
+> preferí la variable en `theme.conf` para tener todo centralizado.
 
 ### Configurar Multi-Monitor
 
@@ -684,6 +701,75 @@ systemctl --user restart swayidle
 
 ---
 
+## 🎯 Iconos de Workspace (sworkstyle)
+
+[Swayest Workstyle](https://github.com/WillPower3309/swayest-workstyle)
+es un daemon que escucha la IPC de Sway y renombra dinámicamente los
+workspaces para que cada uno muestre el icono de la app que tiene
+foco. Por ejemplo, el workspace `2` se convierte en `2` cuando
+tiene una ventana de Firefox, en `2` cuando es VSCode, etc.
+
+### ¿Cómo funciona?
+
+```
+┌──────────────┐  sway IPC events  ┌──────────────┐  rename  ┌──────────┐
+│  Sway        │ ────────────────▶ │  sworkstyle  │ ───────▶ │ Waybar   │
+│  (workspaces)│                   │  (daemon)    │          │ workspaces│
+└──────────────┘                   └──────────────┘          └──────────┘
+```
+
+`sworkstyle` se conecta al socket de Sway (`SWAYSOCK`), recibe los
+eventos de cambio de ventana, y publica nombres de workspace con
+iconos Nerd Font directamente en la barra. El módulo
+`sway/workspaces` de Waybar los levanta automáticamente.
+
+### Instalación
+
+`sworkstyle` está en AUR. El flujo completo es:
+
+```bash
+# 1. Instalar el binario
+yay -S sworkstyle
+
+# 2. Correr el setup (crea el symlink + habilita el servicio)
+~/.config/sway/setup-sworkstyle.sh
+
+# 3. Recargar Sway para que el autostart levante el servicio
+swaymsg reload   # o Super+Shift+C
+```
+
+Verificación:
+```bash
+systemctl --user status sworkstyle
+pgrep -af sworkstyle
+```
+
+### Configuración personalizada
+
+`sworkstyle` usa la config por defecto del paquete
+(`/usr/share/sworkstyle/config.toml`) con mapeos de app_id / class
+a iconos Nerd Font. Para personalizarla:
+
+```bash
+mkdir -p ~/.config/sworkstyle
+cp /usr/share/sworkstyle/config.toml ~/.config/sworkstyle/config.toml
+$EDITOR ~/.config/sworkstyle/config.toml
+systemctl --user restart sworkstyle
+```
+
+### ¿Por qué un servicio systemd?
+
+Mismo motivo que `swayidle`: para que el daemon se reinicie solo
+si se cae, se levante en cada login gráfico (no en cada reload
+de Sway), y esté trackeado en el repo. La unidad vive en
+`systemd/user/sworkstyle.service` y el script de setup
+(`setup-sworkstyle.sh`) la enlaza a `~/.config/systemd/user/`.
+Sway corre ese script en cada arranque desde el autostart
+(variable `$initialize_workspace_icons`), así que tras un `git pull`
+no hace falta correrlo a mano.
+
+---
+
 ## 🐛 Troubleshooting
 
 ### Sway no arranca
@@ -703,6 +789,53 @@ journalctl --user -u sway -b
 killall waybar
 waybar &
 ```
+
+### Los iconos de las apps no aparecen en los workspaces
+
+Síntoma: en la barra de workspaces de Waybar ves números
+(`2  4  5  8`) pero no aparece el icono de la app que está
+foco en cada workspace. Lo más rápido es correr el script de
+setup:
+
+```bash
+~/.config/sway/setup-sworkstyle.sh
+systemctl --user status sworkstyle
+```
+
+Si aun así no aparecen iconos, causas típicas:
+
+1. **sworkstyle no está instalado** (es la causa más común):
+   ```bash
+   command -v sworkstyle
+   # Si no devuelve nada, instalar desde AUR:
+   yay -S sworkstyle
+   ```
+   El script de setup aborta con un mensaje claro si no está.
+
+2. **El servicio `sworkstyle` no está activo**:
+   ```bash
+   systemctl --user status sworkstyle
+   # Si está "inactive":
+   systemctl --user enable --now sworkstyle
+   ```
+
+3. **Falta la unidad o el symlink**:
+   ```bash
+   ls -l ~/.config/systemd/user/sworkstyle.service
+   # Debe apuntar a ~/.config/sway/systemd/user/sworkstyle.service
+   # Si no, recrear:
+   mkdir -p ~/.config/systemd/user
+   ln -sf ~/.config/sway/systemd/user/sworkstyle.service \
+          ~/.config/systemd/user/sworkstyle.service
+   systemctl --user daemon-reload
+   systemctl --user enable --now sworkstyle
+   ```
+
+4. **Falta la Nerd Font** en la configuración de Waybar. Los iconos
+   de sworkstyle son glyphs de Nerd Font; si tu fuente no los
+   incluye, vas a ver cuadros vacíos. Verificá que tu `$gui-font`
+   o la fuente de Waybar sea una Nerd Font (por ejemplo,
+   `ttf-roboto-mono-nerd`).
 
 ### Screenshots no funcionan
 

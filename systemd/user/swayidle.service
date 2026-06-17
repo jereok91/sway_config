@@ -5,7 +5,6 @@ PartOf=graphical-session.target
 
 [Service]
 Type=simple
-Environment=SWAYSOCK
 ExecStart=/usr/bin/swayidle -w \
     timeout 240 'brightnessctl -s && brightnessctl set 10' \
                 resume 'brightnessctl -r' \
