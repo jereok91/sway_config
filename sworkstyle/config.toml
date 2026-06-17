@@ -18,7 +18,7 @@ separator = ' '
 'foot'        = ''   # nf-linux-foot
 'footclient'  = ''
 'alacritty'   = ''   # nf-linux-alacritty
-'kitty'       = '󰄛'   # nf-linux-kitty
+'kitty'       = ''   # nf-linux-kitty
 'wezterm'     = ''   # nf-linux-wezterm
 
 # Editors / dev tools (exact app_id match)
@@ -39,7 +39,7 @@ separator = ' '
 # Browsers
 'firefox'         = ''   # nf-md-firefox
 'firefox-esr'     = ''
-'chromium'        = '󰊯'   # nf-md-google_chrome
+'chromium'        = ''   # nf-md-google_chrome
 'chrome'          = ''
 'google-chrome'   = ''
 'brave-browser'   = ''   # reuse chrome glyph
