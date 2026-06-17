@@ -6,6 +6,10 @@
 Una configuración completa y lista para producción de **Sway** (i3-compatible Wayland compositor), optimizada para productividad máxima con herramientas modernas, theming personalizado y atajos de teclado ergonómicos.
 
 ---
+## 📜 Screenshot
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/0c16bfdc-427e-4902-a6ed-0e5c5e2155e9" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/1c6a2e9e-1efc-40b3-b353-d55ec525a110" />
+
 
 ## 📋 Tabla de Contenidos
 
