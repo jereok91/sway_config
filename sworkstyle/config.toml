@@ -53,12 +53,12 @@ separator = ' '
 'discord-canary'      = ''
 'Element'             = ''
 'Slack'               = ''   # nf-md-slack
-'telegram-desktop'    = ''   # nf-md-telegram
-'org.telegram.desktop'= ''
+'telegram-desktop'    = ''   # nf-md-telegram
+'org.telegram.desktop'= ''
 'thunderbird'         = ''   # nf-md-thunderbird
 'teams-for-linux'     = '󰊻'   # nf-md-microsoft_teams
 'microsoft-teams'     = '󰊻'
-'elecwhat'            = ''   # nf-md-forum (WhatsApp client)
+'elecwhat'            = '󰖣'   # nf-md-forum (WhatsApp client)
 
 # Files / system
 'pcmanfm'         = ''   # nf-md-folder
