@@ -14,6 +14,19 @@ fallback  = '󰘔'   # nf-md-file_document
 separator = ' '
 
 [matching]
+# Pages 
+"/GitLab/"    = ""
+"/YouTube/"   = '󰗃'
+'/vim/'       = ''
+'/nvim/'      = ''
+'/tmux/'      = ''
+'/GitHub/'    = ''
+'/Claude/'    = '󰚩'
+'/ChatGPT/'   = '󰚩'
+'/Discord/'   = ''
+'/Gmail/'      = ''
+
+
 # Terminals
 'foot'        = ''   # nf-linux-foot
 'footclient'  = ''
@@ -29,7 +42,7 @@ separator = ' '
 'gvim'        = ''   # nf-dev-vim
 'vim'         = ''
 'nvim'        = ''
-'mongodb-compass'     = ''
+'Postman'     = ''
 
 # nvim/vim running INSIDE any terminal: match by window title.
 # (the app_id will be the terminal itself, e.g. 'foot', so we
@@ -51,7 +64,7 @@ separator = ' '
 
 # Chat / mail
 'discord'             = ''   # nf-md-discord
-'discord-canary'      = ''
+'discord-canary'      = ''
 'Element'             = ''
 'Slack'               = ''   # nf-md-slack
 'telegram-desktop'    = ''   # nf-md-telegram
@@ -62,14 +75,15 @@ separator = ' '
 'elecwhat'            = '󰖣'   # nf-md-forum (WhatsApp client)
 
 # Databases / dev tools
-'DBeaver'            = ''   # nf-md-table (SQL client)
-'MongoDB Compass'    = ''   # nf-md-database
-'mongodb compass'    = ''   # instance match
-'MongoDBCompass'     = ''
-'mongosh'            = ''   # mongo shell
-'mongo'              = ''
+'DBeaver'            = ''   # nf-md-table (SQL client)
+'MongoDB Compass'    = ''   # nf-md-database
+'mongodb compass'    = ''   # instance match
+'MongoDBCompass'     = ''
+'mongosh'            = ''   # mongo shell
+'mongo'              = ''
 # MongoDB Compass CLI running inside a terminal: match by title
-'/mongodb-compass|mongosh|mongo --/'  = ''
+'/mongodb-compass|mongosh|mongo --/'  = ''
+'jetbrains-datagrip'= ''
 
 # Files / system
 'pcmanfm'         = ''   # nf-md-folder
