@@ -5,20 +5,8 @@ PartOf=graphical-session.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/swayidle -w \
-    timeout 240 'brightnessctl -s && brightnessctl set 10' \
-                resume 'brightnessctl -r' \
-    timeout 300 'swaymsg exec %h/.config/sway/scripts/lock.sh' \
-    timeout 600 '%h/.config/sway/scripts/keyboard-backlight-switch.sh off' \
-                resume '%h/.config/sway/scripts/keyboard-backlight-switch.sh on' \
-    timeout 600 'swaymsg "output * power off"' \
-                resume 'swaymsg "output * power on"' \
-    timeout 600 'swaymsg "output * dpms off"' \
-                resume 'swaymsg "output * dpms on"' \
-    timeout 1800 'systemctl suspend' \
-    before-sleep 'swaymsg exec %h/.config/sway/scripts/lock.sh' \
-    after-resume 'swaymsg "output * dpms on" && brightnessctl -r' \
-    lock 'swaymsg exec %h/.config/sway/scripts/lock.sh'
+# Los tiempos se configuran en ~/.config/sway/idle.conf
+ExecStart=%h/.config/sway/scripts/swayidle.sh
 Restart=on-failure
 RestartSec=1
 

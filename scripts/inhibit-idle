@@ -1,34 +1,55 @@
 #!/usr/bin/env sh
+# Evita el bloqueo/suspensión parando swayidle durante X minutos.
+# swayidle ignora los bloqueos de systemd-inhibit, así que paramos el servicio
+# y un timer transitorio de systemd lo vuelve a arrancar al acabar el tiempo.
+
+TIMER=swayidle-inhibit
+SIGNAL="$HOME/.config/sway/scripts/waybar-signal"
 
 status() {
-    ps -ef | grep -v grep | grep -m 1 -q "systemd-inhibit --what=idle"
+    ! systemctl --user is-active -q swayidle.service
+}
+
+resume() {
+    systemctl --user stop "$TIMER.timer" 2>/dev/null
+    systemctl --user start swayidle.service
+    "$SIGNAL" idle
 }
 
 inhibit() {
-    systemd-inhibit --what=idle --who=swayidle-inhibit --why=commanded --mode=block sleep $1 &
-    waybar-signal idle
+    systemctl --user stop "$TIMER.timer" 2>/dev/null
+    systemctl --user stop swayidle.service
+    if [ -n "$1" ]; then
+        systemd-run --user --quiet --unit="$TIMER" --on-calendar="$(date -d "+$1" "+%F %T")" \
+            sh -c "systemctl --user start swayidle.service; $SIGNAL idle"
+    fi
+    "$SIGNAL" idle
 }
 
 case $1'' in
 'interactive')
-    MINUTES=$(echo -e "1\n10\n15\n20\n30\n45\n60\n90\n120\nUnlimited" | rofi -dmenu -p "Select how many minutes to inhibit idle:")
-    if [ "$MINUTES" = "Unlimited" ]; then
-        SECONDS=$((365 * 24 * 60 * 60))
-    else
-        SECONDS=$((MINUTES * 60))
-    fi
-    inhibit $SECONDS
+    MINUTES=$(printf "10\n15\n20\n30\n45\n60\n90\n120\nUnlimited" | rofi -dmenu -p "Minutes without idle/lock:")
+    case "$MINUTES" in
+    '') ;;
+    'Unlimited') inhibit ;;
+    *[!0-9]*) notify-send "Idle" "Invalid value: $MINUTES" ;;
+    *) inhibit "$MINUTES minutes" ;;
+    esac
     ;;
 'off')
-    pkill -U $USER -f "systemd-inhibit --what=idle" || true
-    waybar-signal idle
+    resume
     ;;
 esac
 
 # Returns data for Waybar
 if status; then
     class="on"
-    text="Inhibiting idle (Mid click to clear)"
+    until=$(systemctl --user show "$TIMER.timer" -p NextElapseUSecRealtime --value 2>/dev/null)
+    if [ -n "$until" ] && [ "$until" != "n/a" ]; then
+        text="Idle inhibited until $(date -d "$until" +%H:%M) (Mid click to clear)"
+    else
+        text="Idle inhibited, no time limit (Mid click to clear)"
+    fi
 else
     class="off"
     text="Idle not inhibited"

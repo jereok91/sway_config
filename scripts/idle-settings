@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# Menú rofi para cambiar los tiempos de inactividad de ~/.config/sway/idle.conf
+
+CONF="$HOME/.config/sway/idle.conf"
+
+declare -A LABELS=(
+    [LOCK_MINUTES]="Bloquear pantalla"
+    [SCREEN_OFF_MINUTES]="Apagar monitores"
+    [SUSPEND_MINUTES]="Suspender"
+    [DIM_MINUTES]="Bajar brillo"
+)
+ORDER=(LOCK_MINUTES SCREEN_OFF_MINUTES SUSPEND_MINUTES DIM_MINUTES)
+
+value() {
+    local v
+    v=$(sed -n "s/^$1=\([0-9]*\).*/\1/p" "$CONF")
+    [ "${v:-0}" -eq 0 ] && echo "desactivado" || echo "$v min"
+}
+
+# Sin argumentos: salida JSON para Waybar
+if [ "$1" != "menu" ]; then
+    tooltip="Tiempos de inactividad"
+    for key in "${ORDER[@]}"; do
+        tooltip+="\\n${LABELS[$key]}: $(value "$key")"
+    done
+    tooltip+="\\n(Click para cambiar)"
+    printf '{"tooltip":"%s"}\n' "$tooltip"
+    exit 0
+fi
+
+menu=""
+for key in "${ORDER[@]}"; do
+    menu+="${LABELS[$key]}: $(value "$key")\n"
+done
+
+choice=$(printf "$menu" | rofi -dmenu -i -p "Tiempos de inactividad") || exit 0
+for key in "${ORDER[@]}"; do
+    [[ "$choice" == "${LABELS[$key]}:"* ]] && selected=$key
+done
+[ -z "$selected" ] && exit 0
+
+minutes=$(printf "1\n2\n5\n10\n15\n20\n30\n45\n60\n90\n120\n0 (desactivar)" |
+    rofi -dmenu -p "${LABELS[$selected]} tras (minutos)") || exit 0
+minutes=${minutes%% *}
+[[ "$minutes" =~ ^[0-9]+$ ]] || { notify-send "Idle" "Valor no válido: $minutes"; exit 1; }
+
+sed -i "s/^$selected=.*/$selected=$minutes/" "$CONF"
+systemctl --user try-restart swayidle
+~/.config/sway/scripts/waybar-signal idle_settings
+
+[ "$minutes" -eq 0 ] && msg="desactivado" || msg="$minutes min"
+notify-send "Idle" "${LABELS[$selected]}: $msg"

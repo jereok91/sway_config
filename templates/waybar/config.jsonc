@@ -32,6 +32,7 @@
     // media
     "custom/playerctl",
     "custom/idle_inhibitor",
+    "custom/idle_settings",
     "custom/dnd",
     "custom/theme",
     "pulseaudio",
@@ -356,5 +357,13 @@
     "on-click": "~/.config/sway/scripts/inhibit-idle off; ~/.config/sway/scripts/inhibit-idle interactive",
     "on-click-middle": "~/.config/sway/scripts/inhibit-idle off",
     "signal": 15
+  },
+  "custom/idle_settings": {
+    "interval": "once",
+    "return-type": "json",
+    "format": "󰔛",
+    "exec": "~/.config/sway/scripts/idle-settings",
+    "on-click": "~/.config/sway/scripts/idle-settings menu",
+    "signal": 18
   }
 }
