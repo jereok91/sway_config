@@ -252,7 +252,7 @@
     "on-click": "swaymsg -q exec '$clipboard'; ~/.config/sway/scripts/waybar-signal clipboard",
     "on-click-right": "swaymsg -q exec '$clipboard-del'; ~/.config/sway/scripts/waybar-signal clipboard",
     "on-click-middle": "rm -f ~/.cache/cliphist/db; ~/.config/sway/scripts/waybar-signal clipboard",
-    "exec": "printf '{\"tooltip\":\"%s\"}' $(cliphist list | wc -l)' item(s) in the clipboard\r(Mid click to clear)'",
+    "exec": "printf '{\"tooltip\":\"%s\"}' $(cliphist list | wc -l)' item(s) in the clipboard\\n(Mid click to clear)'",
     "exec-if": "[ -x \"$(command -v cliphist)\" ] && [ $(cliphist list | wc -l) -gt 0 ]",
     "signal": 9
   },
