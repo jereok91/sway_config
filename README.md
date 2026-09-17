@@ -21,6 +21,7 @@ Una configuración completa y lista para producción de **Sway** (i3-compatible 
 - [Atajos de Teclado](#-atajos-de-teclado)
 - [Temas Incluidos](#-temas-incluidos)
 - [Configuración Personalizada](#-configuración-personalizada)
+- [Idle y Bloqueo de Pantalla](#-idle-y-bloqueo-de-pantalla)
 - [Iconos de Workspace (sworkstyle)](#-iconos-de-workspace-sworkstyle)
 - [Troubleshooting](#-troubleshooting)
 
@@ -36,9 +37,9 @@ Una configuración completa y lista para producción de **Sway** (i3-compatible 
 - **Lanzador de aplicaciones**: Rofi (con soporte Wayland)
 - **Gestor de portapapeles**: cliphist + wl-clipboard
 - **Notificaciones**: Mako con theming dinámico
-- **Bloqueo de pantalla**: swaylock con scripts personalizados
+- **Bloqueo de pantalla**: swaylock (fondo desenfocado con grim + ImageMagick) vía `lock.sh`
 - **Screenshots**: grim + grimshot + swappy para edición
-- **Idle management**: swayidle + idlehack
+- **Idle management**: swayidle con tiempos editables en `idle.conf` (menú Rofi desde Waybar) + idlehack
 - **Autotiling**: autotiling-rs para layouts automáticos
 - **Gestión de brillo**: brightnessctl + wob (barra visual)
 - **Gestión de audio**: PulseAudio/PipeWire con pulsemixer
@@ -217,6 +218,8 @@ sway
 | [ ] | **Screenshot** | swappy | `swappy` | `sudo pacman -S swappy` | - |
 | [ ] | **Screenshot** | slurp | `slurp` | `sudo pacman -S slurp` | - |
 | [ ] | **Lock Screen** | swaylock | `swaylock` | `sudo pacman -S swaylock` | - |
+| [ ] | **Lock Screen** | ImageMagick (blur) | `imagemagick` | `sudo pacman -S imagemagick` | - |
+| [ ] | **Utils** | jq | `jq` | `sudo pacman -S jq` | - |
 | [ ] | **Idle** | swayidle | `swayidle` | `sudo pacman -S swayidle` | - |
 | [ ] | **Idle** | idlehack | `idlehack` | - | `yay -S idlehack` |
 | [ ] | **Brillo** | brightnessctl | `brightnessctl` | `sudo pacman -S brightnessctl` | - |
@@ -225,8 +228,8 @@ sway
 | [ ] | **Audio** | pulsemixer | `pulsemixer` | `sudo pacman -S pulsemixer` | - |
 | [ ] | **Audio** | playerctl | `playerctl` | `sudo pacman -S playerctl` | - |
 | [ ] | **Layout** | autotiling | `autotiling-rs` | - | `yay -S autotiling-rs` |
+| [ ] | **Ventanas** | swayr | `swayr` | `sudo pacman -S swayr` | - |
 | [ ] | **Night Light** | wlsunset | `wlsunset` | `sudo pacman -S wlsunset` | - |
-| [ ] | **Multimedia** | playerctl | `playerctl` | `sudo pacman -S playerctl` | - |
 | [ ] | **Archivos** | PCManFM | `pcmanfm-qt` | `sudo pacman -S pcmanfm-qt` | - |
 | [ ] | **Monitor** | way-displays | `way-displays` | - | `yay -S way-displays` |
 | [ ] | **Monitor** | kanshi | `kanshi` | `sudo pacman -S kanshi` | - |
@@ -255,7 +258,7 @@ sway
 # Paquetes oficiales (Pacman)
 sudo pacman -S --needed sway waybar rofi-wayland foot alacritty kitty \
   wl-clipboard cliphist mako grim grimshot swappy slurp swaylock swayidle \
-  brightnessctl wob pulseaudio pulsemixer playerctl wlsunset pcmanfm-qt \
+  imagemagick jq swayr brightnessctl wob pulseaudio pulsemixer playerctl wlsunset pcmanfm-qt \
   kanshi polkit-gnome calcurse rofimoji btop dex xdg-user-dirs libnotify \
   network-manager-applet ttf-roboto ttf-roboto-mono-nerd papirus-icon-theme
 
@@ -273,7 +276,9 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 ~/.config/sway/
 ├── config                      # Configuración principal de Sway
 ├── autostart                   # Definiciones de aplicaciones al inicio
-├── idle.yaml                   # Configuración de swayidle
+├── idle.conf                   # Tiempos de inactividad en minutos (fuente de verdad)
+├── idle.yaml                   # Config heredada de swayidle (ya no se usa)
+├── generated_background.svg    # Fondo generado (alternativo)
 ├── fondo.jpg                   # Wallpaper 1
 ├── fondo2.jpg                  # Wallpaper 2
 ├── fondo3.jpg                  # Wallpaper 3 (activo)
@@ -293,8 +298,9 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 │   └── theme.conf              # Configuración de fuentes y tema GTK
 │
 ├── definitions.d/              # Definiciones de tema activo
-│   ├── theme.conf              # Tema activo (colores y variables)
-│   └── theme.light.conf_       # Backup de tema claro
+│   ├── theme.conf              # Tema activo (colores, variables y $background)
+│   ├── theme.dark.conf_        # Variante oscura (desactivada)
+│   └── theme.light.conf_~      # Backup de tema claro
 │
 ├── inputs/                     # Configuración de dispositivos de entrada
 │   ├── default-keyboard        # Config de teclado
@@ -310,7 +316,12 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 │
 ├── scripts/                    # Scripts de utilidad
 │   ├── brightness.sh           # Control de brillo
-│   ├── lock.sh                 # Script de bloqueo
+│   ├── lock.sh                 # Script de bloqueo (swaylock con blur)
+│   ├── swayidle.sh             # Lanza swayidle con los tiempos de idle.conf
+│   ├── idle-settings           # Menú Rofi / módulo Waybar para editar idle.conf
+│   ├── inhibit-idle            # Inhibe el idle parando swayidle temporalmente
+│   ├── waybar-signal           # Envía señales de refresco a módulos de Waybar
+│   ├── sway-window-info.sh     # Muestra app_id/class de ventanas (para sworkstyle)
 │   ├── waybar.sh               # Lanzador de waybar
 │   ├── mako.sh                 # Configurador de mako
 │   ├── screenshot-notify.sh    # Notificaciones de screenshots
@@ -378,10 +389,13 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 | `Super + Enter` | Abrir terminal (Foot) |
 | `Super + Ctrl + Enter` | Abrir Alacritty |
 | `Super + Shift + Enter` | Abrir Kitty |
-| `Super + D` | Abrir launcher (Rofi) |
+| `Super + D` / `Alt + Space` | Abrir launcher (Rofi) |
+| `Super + Shift + D` | Abrir launcher en un workspace vacío |
+| `Super + Shift + P` | Historial del portapapeles (cliphist) |
 | `Super + Shift + Q` | Cerrar ventana activa |
 | `Super + Shift + C` | Recargar configuración |
-| `Super + Shift + E` | Menú de apagado |
+| `Super + Shift + E` | Menú de apagado (modo shutdown) |
+| `Super + Shift + B` | Mostrar/ocultar Waybar |
 
 ### Navegación (Vim-style)
 
@@ -391,6 +405,9 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 | `Super + ←/↓/↑/→` | Mover foco (flechas) |
 | `Super + Shift + H/J/K/L` | Mover ventana |
 | `Super + Shift + ←/↓/↑/→` | Mover ventana (flechas) |
+| `Super + Alt + H/J/K/L` o flechas | Mover workspace a otro monitor |
+| `Super + P` | Lista de ventanas abiertas (swayr) |
+| `Alt + Tab` | Ventana urgente o usada recientemente (swayr) |
 
 ### Workspaces
 
@@ -398,6 +415,10 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 |-------|--------|
 | `Super + [1-10]` | Cambiar a workspace N |
 | `Super + Shift + [1-10]` | Mover ventana a workspace N |
+| `Super + Tab` | Workspace anterior (back and forth) |
+| `Super + N` | Ir a un workspace vacío |
+| `Super + Shift + N` | Mover ventana a un workspace vacío |
+| `Super + Shift + M` | Mover ventana a un workspace vacío y seguirla |
 
 ### Layouts
 
@@ -409,6 +430,7 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 | `Super + W` | Layout tabbed |
 | `Super + E` | Toggle split |
 | `Super + F` | Fullscreen |
+| `Super + Shift + F` | Fullscreen global (todas las salidas) |
 | `Super + Shift + Space` | Toggle floating |
 | `Super + Space` | Cambiar foco tiling/floating |
 | `Super + A` | Foco en contenedor padre |
@@ -425,8 +447,9 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 | Atajo | Acción |
 |-------|--------|
 | `Super + R` | Entrar a modo resize |
-| `H/J/K/L` (en modo) | Redimensionar |
-| `←/↓/↑/→` (en modo) | Redimensionar |
+| `H/J/K/L` o `←/↓/↑/→` (en modo) | Redimensionar 10px |
+| `Shift + H/J/K/L` o flechas | Redimensionar 50px |
+| `+` / `-` (en modo) | Aumentar / reducir gaps |
 | `Enter/Esc` | Salir del modo |
 
 ### Screenshots
@@ -438,6 +461,15 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 | `P` (en modo) | Capturar región seleccionada |
 | `Shift + O/P` | Capturar y subir a x0.at |
 | `Print` | Screenshot rápido (grim) |
+
+### Grabación de Pantalla
+
+| Atajo | Acción |
+|-------|--------|
+| `Super + Shift + R` | Modo grabación |
+| `R` (en modo) | Grabar pantalla (`recorder.sh`) |
+| `Shift + R` (en modo) | Grabar con audio |
+| `Super + Esc` | Detener grabación (wf-recorder) |
 
 ### Multimedia
 
@@ -454,9 +486,14 @@ yay -S --needed wl-clip-persist idlehack autotiling-rs way-displays \
 
 | Atajo | Descripción |
 |-------|-------------|
-| `Super + Shift + T` | Theme Switcher interactivo (si lo configuraste) |
+| `Super + Shift + I` | Inhibir idle/bloqueo por X minutos |
+| `Ctrl + Alt + Delete` | Administrador de tareas (btop) |
+| `Alt + Shift + E` | Selector de emojis (rofimoji) |
+| `Alt + +` / `Alt + -` / `Super + =` | Escalar salida arriba / abajo / por defecto |
+| `XF86AudioPlay/Next/Prev` | Control multimedia (playerctl) |
+| `Super + Shift + T` | Theme Switcher interactivo (sólo si agregás el atajo, ver abajo) |
 | Ver `~/.config/sway/modes/` | Atajos de modos especializados |
-| `Super + ?` | Mostrar ayuda de atajos (si está configurado) |
+| `Super + ?` | Mostrar/ocultar ayuda de atajos (nwg-wrapper) |
 
 ---
 
@@ -596,59 +633,89 @@ Luego recarga Sway con `Super + Shift + C`.
 ## 🔒 Idle y Bloqueo de Pantalla
 
 El comportamiento de inactividad y bloqueo se gestiona con **swayidle**
-arrancado como servicio de systemd del usuario, complementado con
-**systemd-inhibit** desde un script de Waybar para inhibir el idle
-temporalmente (útil durante presentaciones o vídeos).
+arrancado como servicio de systemd del usuario. Los tiempos se definen
+en un único archivo editable (`idle.conf`) y se pueden cambiar desde
+Waybar sin tocar la unidad systemd.
 
 ### ¿Cómo funciona?
 
 ```
-┌──────────────────┐    timeout 300    ┌──────────────────┐
-│  swayidle (240s) │ ────────────────▶ │  $locking        │  → lock.sh
-│  (servicio user) │                   │  (lock + dpms)   │
-└──────────────────┘                   └──────────────────┘
-        ▲
-        │ systemd-inhibit --what=idle
-        │ (inhibit-idle desde Waybar)
+┌─────────────┐  lee   ┌──────────────────────┐  exec  ┌──────────────┐
+│  idle.conf  │ ─────▶ │ scripts/swayidle.sh  │ ─────▶ │  swayidle    │ → lock.sh, power off, suspend
+│  (minutos)  │        │ (genera argumentos)  │        │ (servicio)   │
+└─────────────┘        └──────────────────────┘        └──────────────┘
+       ▲                                                      ▲
+       │ idle-settings (menú Rofi)                            │ stop / start
+       │ módulo Waybar custom/idle_settings                   │ inhibit-idle (+ timer systemd)
 ```
 
-- **swayidle** lee los timeouts definidos en `systemd/user/swayidle.service`
-  y dispara los comandos correspondientes al cumplirse cada `timeout`.
-- **`lock.sh`** (`scripts/lock.sh`) decide el locker real en función de
-  lo que tengas instalado: `gtklock` → `waylock` → `swaylock-effects` →
-  `swaylock` plano.
-- **Inhibir el idle** desde el icono de Waybar (`custom/idle_inhibitor`)
-  lanza `systemd-inhibit --what=idle ... sleep N` en segundo plano;
-  mientras ese proceso esté vivo, swayidle **no** dispara el lock ni el
-  dpms. Al expirar el tiempo o al pulsar click central, la inhibición
-  se libera y swayidle vuelve a controlar el sistema.
+- **`systemd/user/swayidle.service`** ejecuta `scripts/swayidle.sh`.
+- **`scripts/swayidle.sh`** carga `idle.conf`, convierte los minutos a
+  segundos y lanza `swayidle -w` sólo con los pasos que tengan un valor
+  mayor que `0`. Si `idle.conf` no existe usa valores por defecto
+  (4 / 5 / 10 / 30 min).
+- **`scripts/lock.sh`** decide el locker real en función de lo que
+  tengas instalado (ver [Pantalla de bloqueo](#pantalla-de-bloqueo)).
+- **Inhibir el idle** detiene el servicio `swayidle` y, si se eligió una
+  duración, crea un timer transitorio de systemd (`swayidle-inhibit`)
+  que lo vuelve a arrancar al terminar. Se usa este enfoque porque
+  swayidle **ignora** los bloqueos de `systemd-inhibit`.
 
-### Timeouts configurados (swayidle.service)
+### Tiempos de inactividad (`idle.conf`)
 
-| Tiempo (s) | Acción                                          |
-|-----------:|-------------------------------------------------|
-| **240**    | Bajar brillo a 10% (restaurar al reanudar)      |
-| **300**    | Bloquear pantalla (`lock.sh`)                   |
-| **600**    | Apagar retroiluminación de teclado (restaurar)  |
-| **600**    | `output * power off` (restaurar al reanudar)    |
-| **600**    | `output * dpms off` (restaurar al reanudar)     |
-| **1800**   | `systemctl suspend` (suspender el sistema)      |
+Los valores están en **minutos**; `0` desactiva ese paso.
 
-Además:
+| Variable             | Valor actual | Acción                                                        |
+|----------------------|-------------:|---------------------------------------------------------------|
+| `DIM_MINUTES`        | **1**        | Bajar brillo al 10% (restaura al reanudar; requiere `brightnessctl`) |
+| `LOCK_MINUTES`       | **2**        | Bloquear pantalla (`lock.sh`)                                 |
+| `SCREEN_OFF_MINUTES` | **5**        | `output * power off` + apagar retroiluminación del teclado (restaura al reanudar) |
+| `SUSPEND_MINUTES`    | **30**       | `systemctl suspend`                                           |
+
+Además, siempre se configuran:
 
 - `before-sleep`: bloquea la pantalla antes de suspender.
-- `after-resume`: reactiva dpms y restaura el brillo.
-- `lock`: bloquea al recibir señal explícita.
+- `after-resume`: vuelve a encender las salidas (`output * power on`).
+- `lock`: bloquea al recibir la señal explícita (`loginctl lock-session`).
 
-> **Nota sobre batería vs corriente:** en este repo se usa un único
-> timeout de 1800s para suspender. El diseño original diferenciaba
-> entre batería (900s) y corriente (3600s) usando `acpi`, pero
-> `acpi` no es un paquete de los repos oficiales y muchas máquinas
-> (sobre todo desktops) no exponen `/sys/class/power_supply/AC*/`,
-> por lo que la comprobación fallaba silenciosamente y la suspensión
-> nunca se disparaba. Si tenés un portátil y querés distintos
-> tiempos para batería y corriente, podés reemplazar el `timeout
-> 1800` por un script propio que lea `cat /sys/class/power_supply/*/online`.
+Para cambiar los tiempos tenés dos opciones:
+
+```bash
+# Opción A: desde Waybar, click en el icono 󰔛 (custom/idle_settings)
+~/.config/sway/scripts/idle-settings menu
+
+# Opción B: editar el archivo y reiniciar el servicio
+$EDITOR ~/.config/sway/idle.conf
+systemctl --user restart swayidle
+```
+
+El menú `idle-settings` edita `idle.conf`, reinicia `swayidle`
+(`try-restart`), refresca el módulo de Waybar (señal 18) y muestra
+una notificación con el nuevo valor. El tooltip del icono muestra los
+tiempos actuales.
+
+> **Nota sobre batería vs corriente:** se usa un único timeout de
+> suspensión. El diseño original diferenciaba entre batería y
+> corriente usando `acpi`, pero `acpi` no está en los repos oficiales
+> y muchas máquinas (sobre todo desktops) no exponen
+> `/sys/class/power_supply/AC*/`, por lo que la suspensión nunca se
+> disparaba. Si querés distintos tiempos, podés extender
+> `scripts/swayidle.sh` leyendo `/sys/class/power_supply/*/online`.
+
+### Pantalla de bloqueo
+
+`scripts/lock.sh` primero comprueba si ya hay un `swaylock` corriendo
+(evita dobles bloqueos, p. ej. timeout + `before-sleep`) y luego usa
+el primer locker disponible:
+
+1. `gtklock`
+2. `waylock`
+3. `swaylock-effects` (blur, reloj e indicador nativos)
+4. **swaylock con fondo desenfocado**: si están `grim` y `magick`
+   (ImageMagick), captura cada monitor activo (vía `swaymsg` + `jq`),
+   lo desenfoca y oscurece, guarda las imágenes en
+   `$XDG_RUNTIME_DIR/swaylock/` y se las pasa a `swaylock` por salida.
+5. `swaylock` plano con color de fondo `#1e1e2e`.
 
 ### Instalación de la unidad systemd
 
@@ -674,10 +741,9 @@ systemctl --user enable --now swayidle
 ```
 
 Sway ejecuta este script automáticamente en cada arranque desde
-`autostart` (variable `$initialize_idle_daemon`) y desde
+`autostart` (variable `$initialize_idle_daemon`), invocada en
 `config.d/99-autostart-applications.conf`, así que tras un `git pull`
-no hace falta correrlo a mano: la próxima vez que inicies o recargues
-Sway, el script detectará cualquier unidad nueva y la enlazará.
+no hace falta correrlo a mano.
 
 ### Inhibir el idle desde Waybar
 
@@ -685,27 +751,28 @@ El módulo `custom/idle_inhibitor` (ver `templates/waybar/config.jsonc`)
 ejecuta `scripts/inhibit-idle`:
 
 - **Click izquierdo**: cancela la inhibición actual y abre el menú de
-  Rofi para elegir una nueva duración (1, 10, 15, 20, 30, 45, 60, 90,
+  Rofi para elegir una nueva duración (10, 15, 20, 30, 45, 60, 90,
   120 min o *Unlimited*).
-- **Click central**: cancela la inhibición inmediatamente.
-- El icono cambia entre `󰒲` (inactivo) y `󰒳` (inhibiendo).
+- **Click central**: cancela la inhibición y vuelve a arrancar `swayidle`.
+- El icono cambia entre `󰒲` (inactivo) y `󰒳` (inhibiendo); el tooltip
+  muestra hasta qué hora dura la inhibición.
 
 También hay un atajo de teclado directo: `Super + Shift + I` ejecuta
 `inhibit-idle interactive` (ver `modes/default`).
 
-### Relación con `idle.yaml`
-
-El archivo `idle.yaml` es la configuración *legible* de los timeouts,
-pero **no se lee directamente**: el binario `swayidle-conf` (que
-traduce yaml a argumentos de swayidle) **no forma parte** de los
-paquetes oficiales. La fuente de verdad es la unidad
-`systemd/user/swayidle.service`, que refleja los mismos valores.
-Si modificas los timeouts, edita el `.service` y recarga:
-
 ```bash
-systemctl --user daemon-reload
-systemctl --user restart swayidle
+# Ver si hay una inhibición temporal programada
+systemctl --user list-timers swayidle-inhibit.timer
+# Cancelarla a mano
+~/.config/sway/scripts/inhibit-idle off
 ```
+
+### Sobre `idle.yaml`
+
+`idle.yaml` es un archivo **heredado** y ya **no se usa**: la fuente de
+verdad es `idle.conf`, leído por `scripts/swayidle.sh`. Sus valores
+(timeouts en segundos, lógica con `acpi`) no reflejan la configuración
+actual.
 
 ---
 
@@ -929,8 +996,8 @@ sudo usermod -aG video $USER
 
 ### La pantalla no se bloquea sola / no se apaga la pantalla
 
-Síntomas: swayidle nunca ejecuta el `lock.sh` ni el `dpms off`, aunque
-los timeouts del servicio parezcan correctos. Lo más rápido es
+Síntomas: swayidle nunca ejecuta el `lock.sh` ni apaga las salidas,
+aunque los tiempos de `idle.conf` parezcan correctos. Lo más rápido es
 re-ejecutar el script de setup, que se autocorrige:
 
 ```bash
@@ -970,19 +1037,31 @@ Si aun así no funciona, causas típicas:
    `$initialize_idle_daemon` nunca queda definido y el servicio no
    se levanta en cada arranque de Sway.
 
-4. **Hay un inhibidor activo** (`systemd-inhibit --what=idle`). Si
-   dejaste corriendo el inhibidor de Waybar o un `caffeine`-like, la
-   inhibición bloquea el lock aun con swayidle funcionando. Revisa:
+4. **Hay una inhibición activa desde Waybar**. `inhibit-idle` **detiene**
+   el servicio `swayidle` (con *Unlimited* no se vuelve a arrancar solo).
+   Revisa el icono `󰒳` o:
    ```bash
-   systemd-inhibit --list
+   systemctl --user list-timers swayidle-inhibit.timer
+   ~/.config/sway/scripts/inhibit-idle off   # cancela y rearranca swayidle
+   ```
+
+5. **El paso está desactivado o el valor es inválido** en `idle.conf`
+   (un `0` desactiva ese paso). Revisa el archivo y los argumentos con
+   los que arrancó swayidle:
+   ```bash
+   cat ~/.config/sway/idle.conf
+   pgrep -af swayidle
+   journalctl --user -u swayidle -n 50
    ```
 
 ### La pantalla se apaga pero el sistema nunca suspende
 
-Síntoma: el timeout de 600s apaga la pantalla (dpms off funciona),
-pero la máquina nunca llega a `suspend` aunque pase una hora.
+Síntoma: la pantalla se apaga (`SCREEN_OFF_MINUTES`), pero la máquina
+nunca llega a `suspend` aunque pase una hora.
 
-Causa típica: el `timeout 900/3600` original usaba `acpi --ac-adapter`
+Primero verifica que `SUSPEND_MINUTES` en `idle.conf` no sea `0`.
+
+Causa histórica: el `timeout 900/3600` original usaba `acpi --ac-adapter`
 para distinguir batería de corriente, y luego llamaba a `systemctl
 sleep`. Pero `acpi` no es un paquete de los repos oficiales y muchos
 sistemas (desktops, en particular) no exponen info de AC en
@@ -995,10 +1074,10 @@ command -v acpi          # si no devuelve nada, acpi no está instalado
 ls /sys/class/power_supply/   # si está vacío, no hay info de batería/AC
 ```
 
-Solución: el `systemd/user/swayidle.service` versionado usa un único
-`timeout 1800 'systemctl suspend'` que no depende de `acpi`. Si
-modificaste el `.service` para reintroducir la lógica de batería,
-volvé a correr `setup-swayidle.sh` o reemplazá esa línea.
+Solución: `scripts/swayidle.sh` usa un único
+`timeout $((SUSPEND_MINUTES * 60)) 'systemctl suspend'` que no depende
+de `acpi`. Si reintroduciste la lógica de batería en el script o en el
+`.service`, restaurá las versiones del repo y reiniciá el servicio.
 
 ### Theme Switcher no funciona
 
